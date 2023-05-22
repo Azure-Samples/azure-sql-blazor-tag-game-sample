@@ -1,0 +1,8 @@
+GET http://localhost:7071/api/userinfo
+x-tag-passkey: 94c3f63f-c6b8-46c6-acf4-008a8cc80f66
+x-tag-userid: 06336574-20c2-4aa1-a837-e154101f9923
+
+###
+GET http://localhost:4280/api/userinfo
+x-tag-passkey: 94c3f63f-c6b8-46c6-acf4-008a8cc80f66
+x-tag-userid: 06336574-20c2-4aa1-a837-e154101f9923

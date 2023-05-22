@@ -1,0 +1,21 @@
+name: deploy DB changes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+    - 'SqlDB/**'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: azure/sql-action@v2.2
+        with:
+          connection-string: ${{ secrets.SQLDB }}
+          path: './SqlDB/SqlDB.sqlproj'
+          action: 'Publish'

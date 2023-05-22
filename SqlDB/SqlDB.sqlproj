@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build">
+  <Sdk Name="Microsoft.Build.Sql" Version="0.1.9-preview" />
+  <PropertyGroup>
+    <Name>tagdb</Name>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider</DSP>
+    <ModelCollation>1033, CI</ModelCollation>
+    <IsChangeTrackingOn>True</IsChangeTrackingOn>
+    <ProjectGuid>{00000000-0000-0000-0000-000000000000}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="local.dev.publish.xml" />
+  </ItemGroup>
+</Project>

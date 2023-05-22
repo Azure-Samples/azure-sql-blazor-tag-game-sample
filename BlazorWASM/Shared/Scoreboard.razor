@@ -1,0 +1,45 @@
+
+
+<div class="card">
+    <div class="card-header">
+        Your Scores
+
+        @* for each rainbow, add a 🌈 *@
+        @for (int i = 0; i < userScores.Rainbow; i++)
+        {
+            <span>🌈</span>
+        }
+    </div>
+    <div class="card-body">
+        <div class="container">
+            <div class="row">
+                <div class="col-2">
+                    🟣 @userScores.Purple
+                </div>
+                <div class="col-2">
+                    🔵 @userScores.Blue
+                </div>
+                <div class="col-2">
+                    🟢 @userScores.Green
+                </div>
+                <div class="col-2">
+                    🟡 @userScores.Yellow
+                </div>
+                <div class="col-2">
+                    🟠 @userScores.Orange
+                </div>
+                <div class="col-2">
+                    🔴 @userScores.Red
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    // UserScores parameter
+    [Parameter]
+    public UserScores userScores { get; set; } = new UserScores();
+
+}

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TagApp.Sample</RootNamespace>
+    <NoWarn>1998,4014</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.16" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.16" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

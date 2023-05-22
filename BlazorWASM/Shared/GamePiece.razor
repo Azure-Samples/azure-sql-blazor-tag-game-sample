@@ -1,0 +1,49 @@
+
+@TokenIcon
+
+@code {
+    // color parameter
+    [Parameter]
+    public string TokenColor { get; set; } = "White";
+
+    public string TokenIcon = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine(TokenColor);
+        string previousIcon = TokenIcon;
+
+        switch (TokenColor)
+        {
+            case "White":
+                TokenIcon = "⚪️";
+                break;
+            case "Red":
+                TokenIcon = "🔴";
+                break;
+            case "Orange":
+                TokenIcon = "🟠";
+                break;
+            case "Yellow":
+                TokenIcon = "🟡";
+                break;
+            case "Green":
+                TokenIcon = "🟢";
+                break;
+            case "Blue":
+                TokenIcon = "🔵";
+                break;
+            case "Purple":
+                TokenIcon = "🟣";
+                break;
+            default:
+                TokenIcon = "⚪️";
+                break;
+        }
+
+        if (previousIcon != TokenIcon)
+        {
+            StateHasChanged();
+        }
+    }
+}

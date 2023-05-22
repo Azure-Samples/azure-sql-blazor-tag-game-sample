@@ -1,0 +1,392 @@
+@using System.Net
+@using System.Text
+@using System.Text.Json
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject HttpClient Http
+
+@if (isConnected)
+{
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Let's play tag.</h3>
+                <form>
+                    <label for="tokencolor">1️⃣ Set your gamepiece color: </label>
+                    <select id="tokencolor" @onchange="UpdateColor" value="@userinfo.TokenColor">
+                        @foreach (var tokencolor in Enum.GetValues(typeof(TokenColorOptions)))
+                        {
+                            <option value="@tokencolor">@tokencolor</option>
+                        }
+                    </select>
+                </form>
+                <p class="intro-info">2️⃣ Use the controller to move your gamepiece around.</p>
+                <p class="intro-info">3️⃣ Earn points by moving to a square with another gamepiece on it.</p>
+            </div>
+            <div class="col-sm-6">
+                <Scoreboard UserScores="@userScores"/>
+            </div>
+        </div>
+    </div>
+
+    <div class="card board-card">
+        <div class="card-body">
+            <div class="container">
+                <div class="row gameboard-row">
+                    <div class="col-4" id="UL-board">
+                        <h3>&nbsp;</h3>
+                    </div>
+                    <div class="col-4" id="UM-board">
+                        <h3><GameBoardSquare boardState="@board.Up" /></h3>
+                    </div>
+                    <div class="col-4" id="UR-board">
+                        <h3>&nbsp;</h3>
+                    </div>
+                </div>
+                <div class="row gameboard-row">
+                    <div class="col-4" id="ML-board">
+                        <h3><GameBoardSquare boardState="@board.Left" /></h3>
+                    </div>
+                    <div class="col-4" id="MM-board">
+                        <h6><GamePiece TokenColor="@userinfo.TokenColor"/> at (@userinfo.XLocation, @userinfo.YLocation)</h6>
+                    </div>
+                    <div class="col-4" id="MR-board">
+                        <h3><GameBoardSquare boardState="@board.Right" /></h3>
+                    </div>
+                </div>
+                <div class="row gameboard-row">
+                    <div class="col-4" id="BL-board">
+                        <h3>&nbsp;</h3>
+                    </div>
+                    <div class="col-4" id="BM-board">
+                        <h3><GameBoardSquare boardState="@board.Down" /></h3>
+                    </div>
+                    <div class="col-4" id="BR-board">
+                        <h3>&nbsp;</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card controller-card">
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-4" id="UL-controller">
+                    </div>
+                    <div class="col-4" id="UM-controller">
+                        <button type="button" class="btn btn-primary btn-lg" @onclick="MoveUp" disabled="@buttonState.UpDisabled">Up</button>
+                    </div>
+                    <div class="col-4" id="UR-controller">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4" id="ML-controller">
+                        <button type="button" class="btn btn-primary btn-lg" @onclick="MoveLeft" disabled="@buttonState.LeftDisabled">Left</button>
+                    </div>
+                    <div class="col-4" id="MM-controller">
+                        <h2>🕹️</h2>
+                    </div>
+                    <div class="col-4" id="MR-controller">
+                        <button type="button" class="btn btn-primary btn-lg" @onclick="MoveRight" disabled="@buttonState.RightDisabled">Right</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4" id="BL-controller">
+                    </div>
+                    <div class="col-4" id="BM-controller">
+                        <button type="button" class="btn btn-primary btn-lg" @onclick="MoveDown" disabled="@buttonState.DownDisabled">Down</button>
+                    </div>
+                    <div class="col-4" id="BR-controller">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+else
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+
+@code
+{
+    private UserInfo userinfo = new UserInfo();
+    private MoveResult moveresult = new MoveResult();
+    private UserScores userScores = new UserScores();
+    private GameBoardState board = new GameBoardState();
+    private bool isConnected;
+    private bool userValidated;
+    private ButtonState buttonState = new ButtonState();
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine(firstRender);
+        if ((firstRender || isConnected) && !userValidated)
+        {
+            isConnected = true;
+            await LoadStateAsync();
+            StateHasChanged();
+        }
+
+        if (!isConnected)
+        {
+            Console.WriteLine("Retrying connection");
+            await Task.Delay(5000);
+            await LoadStateAsync();
+            isConnected = true;
+            StateHasChanged();
+        }
+        
+    }
+
+    @* subsequent loads *@
+    private async Task LoadStateAsync()
+    {
+        @* get userid and passkey from local storage *@
+        userinfo = await localStorage.GetItemAsync<UserInfo>("userinfo");
+        if (userinfo != null && userinfo.UserId != Guid.Empty && userinfo.Passkey != Guid.Empty)
+        {
+            @* get users info from server *@
+            try
+            {
+                using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/userinfo"))
+                {
+                    request.Headers.Add("x-tag-userid", userinfo.UserId.ToString());
+                    request.Headers.Add("x-tag-passkey", userinfo.Passkey.ToString());
+                    var response = await Http.SendAsync(request);
+                    // check for 200
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        userinfo = await response.Content.ReadFromJsonAsync<UserInfo>() ?? userinfo;
+                        await localStorage.SetItemAsync("userinfo", userinfo);
+                        await UpdateScoreboard();
+                        await DisplayBoard();
+                        userValidated = true;
+                    }
+                    else if (response.StatusCode == HttpStatusCode.NoContent)
+                    {
+                        await FirstUserSetup();
+                    }
+                    else
+                    {
+                        Console.WriteLine("failed to get userinfo");
+                        isConnected = false;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                isConnected = false;
+            }
+        }
+        else
+        {
+            await FirstUserSetup();
+        }
+    }
+
+    @* first load *@
+    @* send new passkey to server and save userid, passkey to storage *@
+    private async Task FirstUserSetup()
+    {
+        Guid passkey = Guid.NewGuid();
+        try
+        {
+            string newpasskeyjson = "{Passkey: \""+ passkey.ToString()+ "\"  }";
+            using (var request = new HttpRequestMessage(HttpMethod.Put, "/api/newuser"))
+            {
+                Console.WriteLine("setting up new user");
+                request.Content = new StringContent(newpasskeyjson, Encoding.UTF8, "application/json");
+                var response = await Http.SendAsync(request);
+                if (response.IsSuccessStatusCode)
+                {
+                    userinfo = await response.Content.ReadFromJsonAsync<UserInfo>() ?? userinfo;
+                    await localStorage.SetItemAsync("userinfo", userinfo);
+                }
+                else
+                {
+                    Console.WriteLine("failed to setup new user");
+                    isConnected = false;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            isConnected = false;
+        }
+    }
+
+    private async Task MoveUp()
+    {
+        await Move("up");
+    }
+
+    private async Task MoveLeft()
+    {
+        await Move("left");
+    }
+
+    private async Task MoveRight()
+    {
+        await Move("right");
+    }
+
+    private async Task MoveDown()
+    {
+        await Move("down");
+    }
+
+    private async Task Move(string direction)
+    {
+        buttonState.DisableAll();
+        try
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Post, $"/api/playermove/{direction}?userid={userinfo.UserId}"))
+            {
+                request.Headers.Add("x-tag-userid", userinfo.UserId.ToString());
+                request.Headers.Add("x-tag-passkey", userinfo.Passkey.ToString());
+                request.Content = new StringContent(JsonSerializer.Serialize(userinfo), Encoding.UTF8, "application/json");
+                var response = await Http.SendAsync(request);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    moveresult = await response.Content.ReadFromJsonAsync<MoveResult>() ?? moveresult;
+                    userinfo.XLocation = moveresult.XLocation;
+                    userinfo.YLocation = moveresult.YLocation;
+                    await DisplayBoard();
+                    StateHasChanged();
+                }
+                else
+                {
+                    Console.WriteLine("move failed");
+                    isConnected = false;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            isConnected = false;
+        }
+        if (moveresult.PointsEarned.TotalPoints() > 0)
+        {
+            buttonState.DisableGoBack(direction);
+            UpdateScoreboard();
+        }
+        else
+        {
+            buttonState.EnableAll();
+        }
+    }
+
+    private async Task UpdateScoreboard()
+    {
+        try
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Get, $"/api/userscoreboard?userid={userinfo.UserId}"))
+            {
+                var response = await Http.SendAsync(request);
+                @* check for 200 *@
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    userScores = await response.Content.ReadFromJsonAsync<UserScores>() ?? userScores;
+                    StateHasChanged();
+                }
+                else
+                {
+                    Console.WriteLine("failed to get scoreboard");
+                    isConnected = false;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            isConnected = false;
+        }
+    }
+
+    private async Task DisplayBoard()
+    {
+        List<BoardState> boardInfo = new List<BoardState>();
+        try
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Get, $"/api/boardstate?X={userinfo.XLocation}&Y={userinfo.YLocation}"))
+            {
+                var response = await Http.SendAsync(request);
+                @* check for 200 *@
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    boardInfo = await response.Content.ReadFromJsonAsync<List<BoardState>>();
+                    foreach (BoardState item in boardInfo)
+                    {
+                        if (item.XLocation > userinfo.XLocation)
+                        {
+                            board.Right = item;
+                        }
+                        else if (item.XLocation < userinfo.XLocation)
+                        {
+                            board.Left = item;
+                        }
+                        else
+                        {
+                            if (item.YLocation > userinfo.YLocation)
+                            {
+                                board.Up = item;
+                            }
+                            else if (item.YLocation < userinfo.YLocation)
+                            {
+                                board.Down = item;
+                            }
+                        }
+                    }
+                    StateHasChanged();
+                }
+                else
+                {
+                    Console.WriteLine("failed to get gameboard");
+                    isConnected = false;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            isConnected = false;
+        }
+    }
+
+    private async Task UpdateColor(ChangeEventArgs e)
+    {
+        userinfo.TokenColor = e.Value.ToString();
+        
+        @* send patch request to /api/playercolor *@
+        try
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Patch, "/api/playercolor"))
+            {
+                request.Headers.Add("x-tag-userid", userinfo.UserId.ToString());
+                request.Headers.Add("x-tag-passkey", userinfo.Passkey.ToString());
+                request.Content = new StringContent(JsonSerializer.Serialize(userinfo), Encoding.UTF8, "application/json");
+                var response = await Http.SendAsync(request);
+            }
+
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            isConnected = false;
+        }
+        StateHasChanged();
+    }
+
+}

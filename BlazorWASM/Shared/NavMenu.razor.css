@@ -1,0 +1,9 @@
+.navbar {
+    /* background-color: #463668; */
+    background: linear-gradient(#463668 40%, #0078D4);
+}
+
+.btn-outline-repo {
+    color:#8DE971;
+    border-color: #8DE971;
+}

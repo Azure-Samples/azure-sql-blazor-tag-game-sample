@@ -1,0 +1,85 @@
+
+
+@squareContents
+
+@code {
+    // BoardState parameter
+    [Parameter]
+    public BoardState boardState { get; set; } = new BoardState();
+
+    public string squareContents { get; set; } = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (boardState != null)
+        {
+            CombineSquareContents();
+        }
+    }
+
+    private void CombineSquareContents()
+    {
+        string prevSquareContents = squareContents;
+        squareContents = "";
+
+        // show a token for each color
+        if (boardState.Red > 0)
+        {
+            squareContents += "🔴";
+            if (boardState.Red > 1)
+            {
+                squareContents += "("+boardState.Red+") ";
+            }
+        }
+        if (boardState.Orange > 0)
+        {
+            squareContents += "🟠";
+            if (boardState.Orange > 1)
+            {
+                squareContents += "(" + boardState.Orange + ") ";
+            }
+        }
+        if (boardState.Yellow > 0)
+        {
+            squareContents += "🟡";
+            if (boardState.Yellow > 1)
+            {
+                squareContents += "(" + boardState.Yellow + ") ";
+            }
+        }
+        if (boardState.Green > 0)
+        {
+            squareContents += "🟢";
+            if (boardState.Green > 1)
+            {
+                squareContents += "(" + boardState.Green + ") ";
+            }
+        }
+        if (boardState.Blue > 0)
+        {
+            squareContents += "🔵";
+            if (boardState.Blue > 1)
+            {
+                squareContents += "(" + boardState.Blue + ") ";
+            }
+        }
+        if (boardState.Purple > 0)
+        {
+            squareContents += "🟣";
+            if (boardState.Purple > 1)
+            {
+                squareContents += "(" + boardState.Purple + ") ";
+            }
+        }
+
+        if (squareContents == "")
+        {
+            squareContents = "...";
+        }
+
+        if (prevSquareContents != squareContents)
+        {
+            StateHasChanged();
+        }
+    }
+}
