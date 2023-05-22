@@ -11,7 +11,7 @@ products:
 urlFragment: azure-sql-blazor-tag-game-sample
 name: Tag App - Azure SQL + Blazor WebAssembly + Azure Functions SQL bindings Sample
 description: |
-  A knowledge store in Azure Cognitive Search contains AI-generated content created by image and text analyses, for consumption by other processes or apps.
+  A sample Blazor WASM online game with the backend APIs implemented with Azure SQL bindings for Azure Functions.
 ---
 
 # Tag App: Azure SQL + Blazor WebAssembly + Azure Functions SQL bindings Sample
