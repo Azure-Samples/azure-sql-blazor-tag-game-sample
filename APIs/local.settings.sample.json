@@ -3,6 +3,6 @@
   "Values": {
     "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "SqlConnectionString": "Server=localhost;Database=tagdb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=True;"
+    "SqlConnectionString": "Server=localhost;Database=SqlDB;User Id=sa;Password=YourPassword123!;TrustServerCertificate=True;"
   }
 }

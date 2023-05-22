@@ -57,7 +57,11 @@ func start
 ```
 
 2. in **BlazorWASM** folder, start the Blazor WebAssembly app:
+
+Note: The `DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER` is used to disable dotnet from automatically opening a window after watch completes. We'll be running `swa` to host the content in the next step so the extra browser window is unnecessary.
+
 ```bash
+SET DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=1
 dotnet watch
 ```
 
