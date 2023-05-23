@@ -8,7 +8,4 @@
     <IsChangeTrackingOn>True</IsChangeTrackingOn>
     <ProjectGuid>{00000000-0000-0000-0000-000000000000}</ProjectGuid>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="local.dev.publish.xml" />
-  </ItemGroup>
 </Project>
