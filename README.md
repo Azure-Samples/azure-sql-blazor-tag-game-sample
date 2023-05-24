@@ -134,6 +134,17 @@ SQL bindings:
 - Stored procedure SQL input binding with no parameters
 - Table output binding with passkey from request body and output from stored procedure
 
+### POST move user
+[APIs/MovePlayer.cs](APIs/MovePlayer.cs)
+- sends userid and passkey in request header, move direction in request URL path
+- returns confirmation the user was moved
+
+SQL bindings:
+- Query text SQL input binding with parameter from request query string value
+- Imperative binding for a stored procedure SQL input binding with parameters from request header values
+- Imperative binding for a stored procedure SQL input binding with parameters calculated in function
+- Table output binding with output from combined information from input binding and imperative bindings
+
 ## Real-time interactions
 
 ### SQL trigger
