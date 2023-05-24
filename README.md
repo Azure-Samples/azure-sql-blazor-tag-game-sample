@@ -18,6 +18,8 @@ description: |
 
 ![MIT license badge](https://img.shields.io/badge/license-MIT-green.svg)
 
+![header logo](./images/blazor-sql-bindings-header.png)
+
 Demo environment available at https://aka.ms/buildtag
 
 ![Screenshot of the demo app](./images/screenshot.png)
@@ -39,6 +41,7 @@ Demo environment available at https://aka.ms/buildtag
 - .NET SDK 6.0.408 or newer
 - Azure Functions Core Tools
 - Static Web Apps CLI
+- (optional) SignalR endpoint
 
 ### Deploy a local SQL instance
 
@@ -80,9 +83,11 @@ The following are the steps required to deploy this sample to Azure and enable c
 
 3. Add an application setting for `SqlConnectionString` to the Azure Functions app with the connection string to the Azure SQL Database.  This enables the Azure Functions to connect to the database. More information: https://docs.microsoft.com/azure/azure-functions/functions-how-to-use-azure-function-app-settings?tabs=portal#settings
 
-4. Create an Azure Static Web App, leaving the `API` location blank and setting it to the `Standard` plan.  Linking the static web app to your repository will create a GitHub Action workflow that will build and deploy the static web app, similar to [static-web-apps-deploy.yml](.github/sample-workflows/static-web-apps-deploy.yml).  More information: https://learn.microsoft.com/azure/static-web-apps/functions-bring-your-own
+4. Create an Azure SignalR resource in the `Serverless` service mode and place the connection string in the Azure Functions application settings as `AzureSignalRConnectionString`.  This enables the Azure Functions to connect to the SignalR service and provides real-time scoreboard updates when a user is tagged. More information: https://learn.microsoft.com/azure/azure-signalr/signalr-quickstart-dotnet-core#create-an-azure-signalr-resource
 
-5. If you did not link the Azure Static Web App to the Azure Functions app during creation, link the Azure Functions to the Azure Static Web App.  More information: https://learn.microsoft.com/static-web-apps/functions-bring-your-own#link-an-existing-azure-functions-app
+5. Create an Azure Static Web App, leaving the `API` location blank and setting it to the `Standard` plan.  Linking the static web app to your repository will create a GitHub Action workflow that will build and deploy the static web app, similar to [static-web-apps-deploy.yml](.github/sample-workflows/static-web-apps-deploy.yml).  More information: https://learn.microsoft.com/azure/static-web-apps/functions-bring-your-own
+
+6. If you did not link the Azure Static Web App to the Azure Functions app during creation, link the Azure Functions to the Azure Static Web App.  More information: https://learn.microsoft.com/static-web-apps/functions-bring-your-own#link-an-existing-azure-functions-app
 
 ## API Summary
 
@@ -129,6 +134,27 @@ SQL bindings:
 - Stored procedure SQL input binding with no parameters
 - Table output binding with passkey from request body and output from stored procedure
 
+## Real-time interactions
+
+### SQL trigger
+[APIs/UsersTagged.cs](APIs/UsersTagged.cs)
+- when a row is inserted into the Tag.Moves table, the function is started
+- the location is checked for other users and 1 is selected at random to be "tagged"
+- the tagged user's score is updated with a rainbow
+- a SignalR output binding sends a message to the tagged user which refreshes their scoreboard view
+
+SQL bindings:
+- SQL trigger
+- Imperative binding for a SQL query input binding with parameters from trigger payload
+- Imperative binding for a stored procedure SQL input binding for the user selected at random
+
+### SignalR negotiate and broadcast
+[APIs/SignalR.cs](APIs/SignalR.cs)
+- client sends userid as a querystring to the negotiate endpoint, configuring the user to receive messages
+- broadcast endpoint sends a message to users
+
+Both endpoints are configured for the "scoreboard" SignalR hub name.  
+
 
 ## Frontend/Backend interactions
 
@@ -170,7 +196,7 @@ SQL bindings:
 
 ## Resources
 
-(Any additional resources or related projects)
+![SQL bindings overview](./images/sqlbindings-summary.png)
 
 - Azure SQL bindings for Azure Functions: https://aka.ms/sqlbindings
 - SQL Database Projects for VS Code and Azure Data Studio: https://aka.ms/azuredatastudio-sqlprojects

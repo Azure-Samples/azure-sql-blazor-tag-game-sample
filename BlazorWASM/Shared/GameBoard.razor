@@ -1,8 +1,10 @@
 @using System.Net
 @using System.Text
 @using System.Text.Json
+@using Microsoft.AspNetCore.SignalR.Client
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 @if (isConnected)
 {
@@ -124,10 +126,10 @@ else
     private bool isConnected;
     private bool userValidated;
     private ButtonState buttonState = new ButtonState();
-    
+    private HubConnection signalRConnection;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Console.WriteLine(firstRender);
         if ((firstRender || isConnected) && !userValidated)
         {
             isConnected = true;
@@ -180,6 +182,18 @@ else
                         isConnected = false;
                     }
                 }
+
+                @* connect to signalr hub *@
+                signalRConnection = new HubConnectionBuilder()
+                    .WithUrl(NavigationManager.ToAbsoluteUri($"/api?userid={userinfo.UserId}"))
+                    .Build();
+                signalRConnection.On<string>("tagged", async (message) =>
+                {
+                    Console.WriteLine(message);
+                    await UpdateScoreboard();
+                    await DisplayBoard();
+                });
+                await signalRConnection.StartAsync();
             }
             catch (Exception e)
             {
@@ -280,12 +294,12 @@ else
         if (moveresult.PointsEarned.TotalPoints() > 0)
         {
             buttonState.DisableGoBack(direction);
-            UpdateScoreboard();
         }
         else
         {
             buttonState.EnableAll();
         }
+        UpdateScoreboard();
     }
 
     private async Task UpdateScoreboard()

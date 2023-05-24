@@ -19,3 +19,4 @@ jobs:
           connection-string: ${{ secrets.SQLDB }}
           path: './SqlDB/SqlDB.sqlproj'
           action: 'Publish'
+          arguments: '/p:DropObjectsNotInSource=false'
