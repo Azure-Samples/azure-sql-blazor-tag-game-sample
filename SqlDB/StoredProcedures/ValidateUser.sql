@@ -9,7 +9,7 @@ BEGIN
     DECLARE @UserId UNIQUEIDENTIFIER = CONVERT(UNIQUEIDENTIFIER, @UserIdInput)
     DECLARE @Passkey UNIQUEIDENTIFIER = CONVERT(UNIQUEIDENTIFIER, @PasskeyInput)
 
-    SELECT COUNT([UserId]) AS UserValidated
+    SELECT COUNT([UserId]) AS StepValidated
     FROM [Tag].[Users]
     WHERE [UserId] = @UserId AND [Passkey] = @Passkey
 END

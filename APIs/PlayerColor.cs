@@ -31,8 +31,8 @@ namespace Tag.Sample
                     commandType: System.Data.CommandType.StoredProcedure,
                     parameters: $"@UserIdInput={userId},@PasskeyInput={passkey}"
                 );
-            var userValidation = await binder.BindAsync<IEnumerable<UserValidation>>(sqlUserValidationAttribute);
-            if (userValidation.FirstOrDefault().UserValidated != 1)
+            var userValidation = await binder.BindAsync<IEnumerable<StepValidation>>(sqlUserValidationAttribute);
+            if (userValidation.FirstOrDefault().StepValidated != 1)
             {
                 return new BadRequestObjectResult("Invalid user");
             }

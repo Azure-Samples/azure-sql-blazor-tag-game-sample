@@ -12,3 +12,6 @@ CREATE TABLE [Tag].[Moves]
   [MoveTime] DATETIME2 NOT NULL,
   FOREIGN KEY (UserId) REFERENCES Tag.Users(UserId)
 )
+
+-- enable change tracking
+ALTER TABLE Tag.Moves ENABLE CHANGE_TRACKING;

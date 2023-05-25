@@ -3,6 +3,7 @@
   "Values": {
     "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "SqlConnectionString": "Server=localhost;Database=SqlDB;User Id=sa;Password=YourPassword123!;TrustServerCertificate=True;"
+    "SqlConnectionString": "Server=localhost;Database=SqlDB;User Id=sa;Password=YourPassword123!;TrustServerCertificate=True;",
+    "AzureSignalRConnectionString": "Endpoint=https://someendpoint.service.signalr.net;AccessKey=reallylongstringforaccesskey=;Version=1.0;"
   }
 }
